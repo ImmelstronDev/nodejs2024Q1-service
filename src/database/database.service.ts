@@ -1,21 +1,10 @@
-import {
-  ForbiddenException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Album } from 'src/album/entities/album.entity';
 import { Artist } from 'src/artist/entities/artist.entity';
 import { Track } from 'src/track/entities/track.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Favorites } from '../interfaces/favorites.interface';
-import { IUser } from '../interfaces/user.interface';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { DBService } from './abstract/db.servise.abstract';
-import { CreateAlbumDto } from 'src/album/dto/create-album.dto';
-import { CreateArtistDto } from 'src/artist/dto/create-artist.dto';
-import { CreateTrackDto } from 'src/track/dto/create-track.dto';
-import { GenericBD } from './abstract/genericDB.abstract';
 import { InMemoryGenericBD } from './in-memory/in-memory-generic-db';
 import { UpdateArtistDto } from 'src/artist/dto/update-artist.dto';
 import { UpdateTrackDto } from 'src/track/dto/update-track.dto';

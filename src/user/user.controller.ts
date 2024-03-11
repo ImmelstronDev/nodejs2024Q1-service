@@ -18,6 +18,7 @@ import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
@@ -93,9 +94,8 @@ export class UserController {
   @Header('content-type', 'application/json')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: 'deleted successfully',
-    status: HttpStatus.NO_CONTENT,
   })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.removeUser(id);

@@ -1,26 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { DatabaseService } from 'src/database/database.service';
+import { Artist } from './entities/artist.entity';
+import { v4 as uuid4 } from 'uuid';
 
 @Injectable()
 export class ArtistService {
-  create(createArtistDto: CreateArtistDto) {
-    return 'This action adds a new artist';
+  constructor(private readonly databaseService: DatabaseService) {}
+  async createArtist(createArtistDto: CreateArtistDto): Promise<Artist> {
+    const artistPayload = {
+      id: uuid4(),
+      ...createArtistDto,
+    };
+
+    return await this.databaseService.artists.create(artistPayload);
   }
 
-  findAll() {
-    return `This action returns all artist`;
+  async findAllArtists() {
+    return await this.databaseService.artists.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} artist`;
+  async findArtist(id: string) {
+    return await this.databaseService.artists.findOne(id);
   }
 
-  update(id: number, updateArtistDto: UpdateArtistDto) {
-    return `This action updates a #${id} artist`;
+  async updateArtist(id: string, updateArtistDto: UpdateArtistDto) {
+    return await this.databaseService.artists.update(id, updateArtistDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} artist`;
+  async removeArtist(id: string) {
+    return this.databaseService.artists.delete(id);
   }
 }
