@@ -3,40 +3,101 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Header,
+  HttpStatus,
+  Put,
+  HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { User } from './entities/user.entity';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Header('content-type', 'application/json')
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  @ApiCreatedResponse({
+    type: User,
+    description: 'Created',
+  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
+  @Header('content-type', 'application/json')
   @Get()
-  findAll() {
+  @ApiOkResponse({
+    type: [User],
+    description: 'success',
+  })
+  async findAll() {
     return this.userService.findAll();
   }
 
+  @Header('content-type', 'application/json')
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @ApiOkResponse({
+    type: User,
+    description: 'success',
+  })
+  @ApiBadRequestResponse({ description: 'Bad request, invalid id' })
+  @ApiNotFoundResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'user is not found',
+  })
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Header('content-type', 'application/json')
+  @Put(':id')
+  @ApiOkResponse({
+    description: 'updated successfully',
+    type: User,
+  })
+  @ApiBadRequestResponse({ description: 'Bad request, invalid id' })
+  @ApiNotFoundResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'user is not found',
+  })
+  @ApiForbiddenResponse({
+    description: 'oldPassword is wrong',
+  })
+  update(
+    @Param(
+      'id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
+    )
+    id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id, updateUserDto);
   }
 
+  @Header('content-type', 'application/json')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOkResponse({
+    description: 'deleted successfully',
+    status: HttpStatus.NO_CONTENT,
+  })
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.remove(id);
   }
 }
