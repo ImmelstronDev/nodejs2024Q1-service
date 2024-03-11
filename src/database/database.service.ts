@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { Album } from 'src/album/entities/album.entity';
 import { Artist } from 'src/artist/entities/artist.entity';
 import { Track } from 'src/track/entities/track.entity';
@@ -9,6 +9,14 @@ import { InMemoryGenericBD } from './in-memory/in-memory-generic-db';
 import { UpdateArtistDto } from 'src/artist/dto/update-artist.dto';
 import { UpdateTrackDto } from 'src/track/dto/update-track.dto';
 import { UpdateAlbumDto } from 'src/album/dto/update-album.dto';
+import { InMemoryFavoritesDB } from './in-memory/in-memory-favorites-db';
+import { Favorites } from 'src/interfaces/favorites.interface';
+import { FavoriteEntity } from 'src/favorites/entities/favorite.entity';
+// import { async } from 'rxjs';
+
+type Pathname = keyof Favorites;
+
+type Entities = Artist[] | Album[] | Track[];
 
 @Injectable()
 export class DatabaseService implements DBService {
@@ -16,81 +24,33 @@ export class DatabaseService implements DBService {
   readonly artists = new InMemoryGenericBD<Artist, UpdateArtistDto>([]);
   readonly tracks = new InMemoryGenericBD<Track, UpdateTrackDto>([]);
   readonly albums = new InMemoryGenericBD<Album, UpdateAlbumDto>([]);
-  // users: GenericBD<User, UpdateUserDto>;
-  // artists: GenericBD<Artist, CreateArtistDto>;
-  // tracks: GenericBD<Track, CreateTrackDto>;
-  // albums: GenericBD<Album, CreateAlbumDto>;
-  // public readonly users: User[] = [];
-  // public readonly tracks: Track[] = [];
-  // public readonly artists: Artist[] = [];
-  // public readonly albums: Album[] = [];
-  // public readonly favorites: Favorites = {
-  //   tracks: [],
-  //   artists: [],
-  //   albums: [],
-  // };
-  // async addUser(user: User): Promise<IUser> {
-  //   try {
-  //     this.users.push({ ...user });
-  //     delete user.password;
-  //     return user;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
-  // async findAllUsers() {
-  //   try {
-  //     const users = [...this.users];
-  //     const resUsers = users.map((user) => {
-  //       delete user.password;
-  //       return user;
-  //     });
-  //     return resUsers;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
-  // async findOneUser(id: string) {
-  //   try {
-  //     const users = [...this.users];
-  //     const user = users.find((user) => user.id === id);
-  //     if (!user) {
-  //       throw new NotFoundException(`user with id= ${id} is not found`);
-  //     }
-  //     return user;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
-  // async updateUser(id: string, payload: UpdateUserDto) {
-  //   const { newPassword, oldPassword } = payload;
-  //   try {
-  //     const users = [...this.users];
-  //     const user = users.find((user) => user.id === id);
-  //     if (!user) {
-  //       throw new NotFoundException(`user with id= ${id} is not found`);
-  //     }
-  //     if (user.password === oldPassword) {
-  //       user.password = newPassword;
-  //       user.updatedAt = Date.now();
-  //       user.version += 1;
-  //       return { ...user };
-  //     }
-  //     throw new ForbiddenException('incorrect old password');
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
-  // async removeUser(id: string) {
-  //   try {
-  //     const users = this.users;
-  //     const index = users.findIndex((user) => user.id === id);
-  //     if (index === -1) {
-  //       throw new NotFoundException('user not found');
-  //     }
-  //     users.splice(index, 1);
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
+  readonly favorites = new InMemoryFavoritesDB();
+
+  async checkId(id: string, pathname: Pathname) {
+    return await this[pathname].findOne(id);
+  }
+  async create(payload: string, pathname: Pathname) {
+    const obj = await this.checkId(payload, pathname);
+    if (!obj) {
+      throw new UnprocessableEntityException(`${payload} does not exist`);
+    }
+    const res = await this.favorites.create(payload, pathname);
+    return res && `${payload} exis and added to favorites `;
+  }
+
+  async findAll() {
+    const entryObj = await this.favorites.findAll();
+    const keys = Object.keys(entryObj) as unknown as Pathname[];
+    const resObject = await keys.reduce(async (acc, cur) => {
+      const reduceEntryObj = await acc;
+      const entriesId = entryObj[cur];
+      const entities = await entriesId.reduce(async (acc, cur) => {
+        const items = await acc;
+        const entity = await this[cur].findOne(cur);
+        return entity ? [...items, entity] : items;
+      }, Promise.resolve([] as Entities));
+      return { ...reduceEntryObj, [cur]: entities };
+    }, Promise.resolve({} as FavoriteEntity[]));
+    return resObject;
+  }
 }

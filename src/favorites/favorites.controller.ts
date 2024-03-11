@@ -1,34 +1,126 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Delete,
+  Header,
+  ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
+import { FavoriteEntity } from './entities/favorite.entity';
 
+@ApiTags('Favorites')
 @Controller('favorites')
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
-  @Post()
-  create(@Body() createFavoriteDto: CreateFavoriteDto) {
-    return this.favoritesService.create(createFavoriteDto);
+  @Post('/track/:id')
+  @Header('Content-Type', 'application/json')
+  @ApiCreatedResponse({
+    description: 'created success',
+    type: CreateFavoriteDto,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnprocessableEntityResponse({
+    description: 'unprocessable Entity, entity does not exist',
+  })
+  async createTrack(@Param('id', ParseUUIDPipe) id: string) {
+    const msg = await this.favoritesService.create(id, 'tracks');
+    return { msg };
+  }
+
+  @Post('/artist/:id')
+  @Header('Content-Type', 'application/json')
+  @ApiCreatedResponse({
+    description: 'created success',
+    type: CreateFavoriteDto,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnprocessableEntityResponse({
+    description: 'unprocessable Entity, entity does not exist',
+  })
+  async createArtist(@Param('id', ParseUUIDPipe) id: string) {
+    const msg = await this.favoritesService.create(id, 'artists');
+    return { msg };
+  }
+
+  @Post('/album/:id')
+  @Header('Content-Type', 'application/json')
+  @ApiCreatedResponse({
+    description: 'created success',
+    type: CreateFavoriteDto,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnprocessableEntityResponse({
+    description: 'unprocessable Entity, entity does not exist',
+  })
+  async createAlbum(@Param('id', ParseUUIDPipe) id: string) {
+    const msg = await this.favoritesService.create(id, 'albums');
+    return { msg };
   }
 
   @Get()
-  findAll() {
+  @Header('Content-Type', 'application/json')
+  @ApiOkResponse({
+    type: FavoriteEntity,
+    description: 'success',
+  })
+  async findAll() {
     return this.favoritesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favoritesService.findOne(+id);
+  @Delete('track/:id')
+  @Header('Content-Type', 'application/json')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({
+    description: 'success',
+  })
+  @ApiNotFoundResponse({ description: 'Track not found' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request, trackId is invalid',
+  })
+  removeTrack(@Param('id') id: string) {
+    return this.favoritesService.remove(id, 'tracks');
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFavoriteDto: UpdateFavoriteDto) {
-    return this.favoritesService.update(+id, updateFavoriteDto);
+  @Delete('artist/:id')
+  @Header('Content-Type', 'application/json')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({
+    description: 'success',
+  })
+  @ApiNotFoundResponse({ description: 'Artist not found' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request, ArtistId is invalid',
+  })
+  removeArtist(@Param('id') id: string) {
+    return this.favoritesService.remove(id, 'artists');
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favoritesService.remove(+id);
+  @Delete('album/:id')
+  @Header('Content-Type', 'application/json')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({
+    description: 'success',
+  })
+  @ApiNotFoundResponse({ description: 'Album not found' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request, AlbumId is invalid',
+  })
+  removeAlbum(@Param('id') id: string) {
+    return this.favoritesService.remove(id, 'albums');
   }
 }

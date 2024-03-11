@@ -7,10 +7,12 @@ import { CreateArtistDto } from 'src/artist/dto/create-artist.dto';
 import { CreateTrackDto } from 'src/track/dto/create-track.dto';
 import { Album } from 'src/album/entities/album.entity';
 import { CreateAlbumDto } from 'src/album/dto/create-album.dto';
+import { InMemoryFavoritesDB } from '../in-memory/in-memory-favorites-db';
 
 export abstract class DBService {
   readonly users: GenericBD<User, UpdateUserDto>;
   readonly artists: GenericBD<Artist, CreateArtistDto>;
   readonly tracks: GenericBD<Track, CreateTrackDto>;
   readonly albums: GenericBD<Album, CreateAlbumDto>;
+  readonly favorites: InMemoryFavoritesDB;
 }
