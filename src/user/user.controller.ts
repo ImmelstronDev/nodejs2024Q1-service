@@ -37,7 +37,7 @@ export class UserController {
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    return this.userService.createUser(createUserDto);
   }
 
   @Header('content-type', 'application/json')
@@ -47,7 +47,7 @@ export class UserController {
     description: 'success',
   })
   async findAll() {
-    return this.userService.findAll();
+    return this.userService.findAllUsers();
   }
 
   @Header('content-type', 'application/json')
@@ -62,7 +62,7 @@ export class UserController {
     description: 'user is not found',
   })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.findOne(id);
+    return this.userService.findOneUser(id);
   }
 
   @Header('content-type', 'application/json')
@@ -87,7 +87,7 @@ export class UserController {
     id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.update(id, updateUserDto);
+    return this.userService.updateUser(id, updateUserDto);
   }
 
   @Header('content-type', 'application/json')
@@ -98,6 +98,6 @@ export class UserController {
     status: HttpStatus.NO_CONTENT,
   })
   remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.remove(id);
+    return this.userService.removeUser(id);
   }
 }

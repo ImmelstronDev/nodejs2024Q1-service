@@ -9,8 +9,10 @@ import { v4 as uuid4 } from 'uuid';
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-    const user = {
+  async createUser(
+    createUserDto: CreateUserDto,
+  ): Promise<Omit<User, 'password'>> {
+    const userPayload = {
       id: uuid4(),
       version: 1,
       createdAt: Date.now(),
@@ -18,27 +20,34 @@ export class UserService {
       ...createUserDto,
     };
 
-    return await this.databaseService.addUser(user);
+    const user = await this.databaseService.users.create(userPayload);
+    delete user.password;
+    return user;
   }
 
-  async findAll() {
-    return this.databaseService.findAllUsers();
+  async findAllUsers() {
+    const users = await this.databaseService.users.findAll();
+    const res = users.map((user) => {
+      delete user.password;
+      return user;
+    });
+    return res;
   }
 
-  async findOne(id: string) {
-    const user = await this.databaseService.findOneUser(id);
+  async findOneUser(id: string) {
+    const user = await this.databaseService.users.findOne(id);
 
     delete user.password;
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.databaseService.updateUser(id, updateUserDto);
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.databaseService.users.update(id, updateUserDto);
     delete user.password;
     return user;
   }
 
-  async remove(id: string) {
-    return await this.databaseService.removeUser(id);
+  async removeUser(id: string) {
+    return this.databaseService.users.delete(id);
   }
 }
