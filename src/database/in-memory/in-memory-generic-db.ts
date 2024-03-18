@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
   ForbiddenException,
   HttpStatus,
@@ -42,9 +41,7 @@ export class InMemoryGenericBD<T extends DBEntity, K extends DBPayload>
   async findOne(id: string): Promise<T> {
     try {
       const objects = [...this._database];
-      // @ts-ignore
       const object = objects.find((item) => item.id === id);
-      if (!object) throw new NotFoundException('not found this id');
       return object;
     } catch (error) {
       if (error.status === HttpStatus.NOT_FOUND) {
@@ -76,7 +73,6 @@ export class InMemoryGenericBD<T extends DBEntity, K extends DBPayload>
         throw new ForbiddenException('old password is wrong');
       }
       const objects = this._database;
-      //   @ts-ignore
       const index = objects.findIndex((item) => item.id === id);
       if (index === -1) throw new NotFoundException('user not found');
       objects[index] = { ...objects[index], ...payload };
@@ -95,7 +91,6 @@ export class InMemoryGenericBD<T extends DBEntity, K extends DBPayload>
   async delete(id: string) {
     try {
       const objects = this._database;
-      //@ts-ignore
       const index = objects.findIndex((item) => item.id === id);
       if (index === -1) {
         throw new NotFoundException('not found this id');

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { DatabaseService } from 'src/database/database.service';
@@ -21,7 +21,11 @@ export class AlbumService {
   }
 
   async findAlbum(id: string) {
-    return await this.databaseService.albums.findOne(id);
+    const album = await this.databaseService.albums.findOne(id);
+    if (!album) {
+      throw new NotFoundException('Album is not found');
+    }
+    return album;
   }
 
   async updateAlbum(id: string, updateAlbumDto: UpdateAlbumDto) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -36,6 +36,9 @@ export class UserService {
 
   async findOneUser(id: string) {
     const user = await this.databaseService.users.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User is not found');
+    }
 
     delete user.password;
     return user;

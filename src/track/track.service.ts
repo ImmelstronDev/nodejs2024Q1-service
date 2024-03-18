@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { DatabaseService } from 'src/database/database.service';
@@ -21,7 +21,11 @@ export class TrackService {
   }
 
   async findTrack(id: string) {
-    return await this.databaseService.tracks.findOne(id);
+    const track = await this.databaseService.tracks.findOne(id);
+    if (!track) {
+      throw new NotFoundException('Track is not found');
+    }
+    return track;
   }
 
   async updateTrack(id: string, updateTrackDto: UpdateTrackDto) {
