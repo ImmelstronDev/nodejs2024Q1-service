@@ -12,7 +12,6 @@ import { UpdateAlbumDto } from 'src/album/dto/update-album.dto';
 import { InMemoryFavoritesDB } from './in-memory/in-memory-favorites-db';
 import { Favorites } from 'src/interfaces/favorites.interface';
 import { FavoriteEntity } from 'src/favorites/entities/favorite.entity';
-// import { async } from 'rxjs';
 
 type Pathname = keyof Favorites;
 
@@ -29,13 +28,13 @@ export class DatabaseService implements DBService {
   async checkId(id: string, pathname: Pathname) {
     return await this[pathname].findOne(id);
   }
-  async create(payload: string, pathname: Pathname) {
-    const obj = await this.checkId(payload, pathname);
+  async create(id: string, pathname: Pathname) {
+    const obj = await this.checkId(id, pathname);
     if (!obj) {
-      throw new UnprocessableEntityException(`${payload} does not exist`);
+      throw new UnprocessableEntityException(`${id} does not exist`);
     }
-    const res = await this.favorites.create(payload, pathname);
-    return res && `${payload} exis and added to favorites `;
+    const res = await this.favorites.create(id, pathname);
+    return res && `${id} exis and added to favorites `;
   }
 
   async findAll() {
@@ -52,5 +51,15 @@ export class DatabaseService implements DBService {
       return { ...reduceEntryObj, [cur]: entities };
     }, Promise.resolve({} as FavoriteEntity[]));
     return resObject;
+  }
+
+  async delete(id: string, pathname: Pathname) {
+    const fields = ['tracks', 'artists', 'albums'] as Pathname[];
+    await this[pathname].delete(id);
+    await this.favorites.deleteId(id, pathname);
+    for (const field of fields) {
+      if (field === pathname) continue;
+      await this[field].updateField(id);
+    }
   }
 }

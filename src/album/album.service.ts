@@ -33,6 +33,6 @@ export class AlbumService {
   }
 
   async removeAlbum(id: string) {
-    return this.databaseService.albums.delete(id);
+    return this.databaseService.delete(id, 'albums');
   }
 }

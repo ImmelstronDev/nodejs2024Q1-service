@@ -50,4 +50,19 @@ export class InMemoryFavoritesDB {
       throw new InternalServerErrorException('can not delete');
     }
   }
+
+  async deleteId(id: string, pathname: Pathname) {
+    try {
+      const collection = this._database[pathname];
+      const index = collection.findIndex((colId) => colId === id);
+      if (index == -1) {
+        collection.splice(index, 1);
+      }
+    } catch (error) {
+      if (error.status === HttpStatus.NOT_FOUND) {
+        throw error;
+      }
+      throw new InternalServerErrorException('can not delete');
+    }
+  }
 }

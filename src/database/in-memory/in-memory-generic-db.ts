@@ -104,9 +104,15 @@ export class InMemoryGenericBD<T extends DBEntity, K extends DBPayload>
     }
   }
 
-  //   create: (payload: T) => Promise<T>;
-  //   findAll: () => Promise<T[]>;
-  //   findOne: (id: string) => Promise<T>;
-  //   update: (id: string, payload: K) => Promise<T>;
-  //   delete: (id: string) => void;
+  async updateField(id: string) {
+    const collection = this._database;
+    collection.forEach((field) => {
+      const entries = Object.entries(field);
+      entries.forEach(([key, value]) => {
+        if ((key === 'artistId' || key === 'albumId') && value === id) {
+          field[key] = null;
+        }
+      });
+    });
+  }
 }

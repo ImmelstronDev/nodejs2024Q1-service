@@ -33,6 +33,6 @@ export class TrackService {
   }
 
   async removeTrack(id: string) {
-    return this.databaseService.tracks.delete(id);
+    return this.databaseService.delete(id, 'tracks');
   }
 }

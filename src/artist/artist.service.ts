@@ -34,6 +34,6 @@ export class ArtistService {
   }
 
   async removeArtist(id: string) {
-    return this.databaseService.artists.delete(id);
+    return this.databaseService.delete(id, 'artists');
   }
 }
