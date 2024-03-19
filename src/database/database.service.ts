@@ -40,12 +40,13 @@ export class DatabaseService implements DBService {
   async findAll() {
     const entryObj = await this.favorites.findAll();
     const keys = Object.keys(entryObj) as unknown as Pathname[];
+
     const resObject = await keys.reduce(async (acc, cur) => {
       const reduceEntryObj = await acc;
       const entriesId = entryObj[cur];
-      const entities = await entriesId.reduce(async (acc, cur) => {
+      const entities = await entriesId.reduce(async (acc, id) => {
         const items = await acc;
-        const entity = await this[cur].findOne(cur);
+        const entity = await this[cur].findOne(id);
         return entity ? [...items, entity] : items;
       }, Promise.resolve([] as Entities));
       return { ...reduceEntryObj, [cur]: entities };

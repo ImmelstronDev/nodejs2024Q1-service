@@ -17,9 +17,9 @@ export class InMemoryFavoritesDB {
     };
   }
 
-  async create(payload: string, pathname: Pathname) {
+  async create(id: string, pathname: Pathname): Promise<boolean> {
     try {
-      this._database[pathname].push(payload);
+      this._database[pathname].push(id);
       return true;
     } catch (error) {
       throw new InternalServerErrorException('can not create');
@@ -35,11 +35,11 @@ export class InMemoryFavoritesDB {
     }
   }
 
-  async delete(payload: string, pathname: Pathname) {
+  async delete(id: string, pathname: Pathname) {
     try {
       const collection = this._database[pathname];
-      const index = collection.findIndex((id) => id === payload);
-      if (index !== -1) {
+      const index = collection.findIndex((colId) => colId === id);
+      if (index === -1) {
         throw new NotFoundException('Not Found');
       }
       collection.splice(index, 1);
@@ -55,7 +55,7 @@ export class InMemoryFavoritesDB {
     try {
       const collection = this._database[pathname];
       const index = collection.findIndex((colId) => colId === id);
-      if (index == -1) {
+      if (index === -1) {
         collection.splice(index, 1);
       }
     } catch (error) {

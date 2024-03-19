@@ -23,7 +23,7 @@ import {
 import { FavoriteEntity } from './entities/favorite.entity';
 
 @ApiTags('Favorites')
-@Controller('favorites')
+@Controller('favs')
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
