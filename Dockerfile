@@ -32,5 +32,7 @@ COPY . .
 # Expose the port that the application listens on.
 EXPOSE 4000
 
+ENTRYPOINT [ "./entrypoint.sh" ]
+
 # Run the application.
 CMD ["npm", "run"  "start:dev"]
