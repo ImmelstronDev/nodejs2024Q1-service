@@ -1,27 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { DatabaseService } from 'src/database/database.service';
 import { Track } from './entities/track.entity';
-import { v4 as uuid4 } from 'uuid';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: PrismaService) {}
   async createTrack(createTrackDto: CreateTrackDto): Promise<Track> {
-    const trackPayload = {
-      id: uuid4(),
-      ...createTrackDto,
-    };
-    return await this.databaseService.tracks.create(trackPayload);
+    return await this.databaseService.track.create({ data: createTrackDto });
   }
 
   async findAllTracks() {
-    return await this.databaseService.tracks.findAll();
+    return await this.databaseService.track.findMany();
   }
 
   async findTrack(id: string) {
-    const track = await this.databaseService.tracks.findOne(id);
+    const track = await this.databaseService.track.findUnique({
+      where: { id: id },
+    });
     if (!track) {
       throw new NotFoundException('Track is not found');
     }
@@ -29,10 +27,35 @@ export class TrackService {
   }
 
   async updateTrack(id: string, updateTrackDto: UpdateTrackDto) {
-    return await this.databaseService.tracks.update(id, updateTrackDto);
+    try {
+      return await this.databaseService.track.update({
+        where: { id: id },
+        data: updateTrackDto,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User was not found`);
+      } else {
+        throw error;
+      }
+    }
   }
 
   async removeTrack(id: string) {
-    return this.databaseService.delete(id, 'tracks');
+    try {
+      return this.databaseService.track.delete({ where: { id: id } });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User was not found`);
+      } else {
+        throw error;
+      }
+    }
   }
 }

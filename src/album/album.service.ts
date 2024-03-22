@@ -1,27 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { DatabaseService } from 'src/database/database.service';
 import { Album } from './entities/album.entity';
-import { v4 as uuid4 } from 'uuid';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: PrismaService) {}
   async createAlbum(createAlbumDto: CreateAlbumDto): Promise<Album> {
-    const albumPayload = {
-      id: uuid4(),
-      ...createAlbumDto,
-    };
-    return await this.databaseService.albums.create(albumPayload);
+    return await this.databaseService.album.create({ data: createAlbumDto });
   }
 
   async findAllAlbums() {
-    return await this.databaseService.albums.findAll();
+    return await this.databaseService.album.findMany();
   }
 
   async findAlbum(id: string) {
-    const album = await this.databaseService.albums.findOne(id);
+    const album = await this.databaseService.album.findUnique({
+      where: { id: id },
+    });
     if (!album) {
       throw new NotFoundException('Album is not found');
     }
@@ -29,10 +27,35 @@ export class AlbumService {
   }
 
   async updateAlbum(id: string, updateAlbumDto: UpdateAlbumDto) {
-    return await this.databaseService.albums.update(id, updateAlbumDto);
+    try {
+      return await this.databaseService.album.update({
+        where: { id: id },
+        data: updateAlbumDto,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User was not found`);
+      } else {
+        throw error;
+      }
+    }
   }
 
   async removeAlbum(id: string) {
-    return this.databaseService.delete(id, 'albums');
+    try {
+      return this.databaseService.album.delete({ where: { id: id } });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User was not found`);
+      } else {
+        throw error;
+      }
+    }
   }
 }

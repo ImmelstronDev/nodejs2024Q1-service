@@ -38,7 +38,8 @@ export class UserController {
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+    const user = this.userService.createUser(createUserDto);
+    // return new User(user);
   }
 
   @Header('content-type', 'application/json')

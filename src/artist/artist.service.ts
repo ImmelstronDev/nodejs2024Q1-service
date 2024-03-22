@@ -1,28 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { DatabaseService } from 'src/database/database.service';
 import { Artist } from './entities/artist.entity';
-import { v4 as uuid4 } from 'uuid';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: PrismaService) {}
   async createArtist(createArtistDto: CreateArtistDto): Promise<Artist> {
-    const artistPayload = {
-      id: uuid4(),
-      ...createArtistDto,
-    };
-
-    return await this.databaseService.artists.create(artistPayload);
+    return await this.databaseService.artist.create({ data: createArtistDto });
   }
 
   async findAllArtists() {
-    return await this.databaseService.artists.findAll();
+    return await this.databaseService.artist.findMany();
   }
 
   async findArtist(id: string) {
-    const artist = await this.databaseService.artists.findOne(id);
+    const artist = await this.databaseService.artist.findUnique({
+      where: { id: id },
+    });
     if (!artist) {
       throw new NotFoundException('Artist is not found');
     }
@@ -30,10 +27,35 @@ export class ArtistService {
   }
 
   async updateArtist(id: string, updateArtistDto: UpdateArtistDto) {
-    return await this.databaseService.artists.update(id, updateArtistDto);
+    try {
+      return await this.databaseService.artist.update({
+        where: { id: id },
+        data: updateArtistDto,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User was not found`);
+      } else {
+        throw error;
+      }
+    }
   }
 
   async removeArtist(id: string) {
-    return this.databaseService.delete(id, 'artists');
+    try {
+      return this.databaseService.artist.delete({ where: { id: id } });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`User was not found`);
+      } else {
+        throw error;
+      }
+    }
   }
 }
