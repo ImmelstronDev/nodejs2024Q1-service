@@ -2,7 +2,7 @@
 
 # Run database migrations
 npx prisma generate
-npx prisma migrate dev --preview-feature --name postgres
+npx prisma migrate dev --preview-feature --name initial
 
 # Run the main container command
 exec "$@"
