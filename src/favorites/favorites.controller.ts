@@ -38,7 +38,7 @@ export class FavoritesController {
     description: 'unprocessable Entity, entity does not exist',
   })
   async createTrack(@Param('id', ParseUUIDPipe) id: string) {
-    const msg = await this.favoritesService.create(id, 'tracks');
+    const msg = await this.favoritesService.createTrack(id);
     return { msg };
   }
 
@@ -53,7 +53,7 @@ export class FavoritesController {
     description: 'unprocessable Entity, entity does not exist',
   })
   async createArtist(@Param('id', ParseUUIDPipe) id: string) {
-    const msg = await this.favoritesService.create(id, 'artists');
+    const msg = await this.favoritesService.createArtist(id);
     return { msg };
   }
 
@@ -68,7 +68,7 @@ export class FavoritesController {
     description: 'unprocessable Entity, entity does not exist',
   })
   async createAlbum(@Param('id', ParseUUIDPipe) id: string) {
-    const msg = await this.favoritesService.create(id, 'albums');
+    const msg = await this.favoritesService.createAlbum(id);
     return { msg };
   }
 
@@ -79,7 +79,7 @@ export class FavoritesController {
     description: 'success',
   })
   async findAll() {
-    return this.favoritesService.findAll();
+    return await this.favoritesService.findAll();
   }
 
   @Delete('track/:id')
@@ -92,8 +92,8 @@ export class FavoritesController {
   @ApiBadRequestResponse({
     description: 'Bad Request, trackId is invalid',
   })
-  removeTrack(@Param('id') id: string) {
-    return this.favoritesService.remove(id, 'tracks');
+  removeTrack(@Param('id', ParseUUIDPipe) id: string) {
+    return this.favoritesService.removeTrack(id);
   }
 
   @Delete('artist/:id')
@@ -106,8 +106,8 @@ export class FavoritesController {
   @ApiBadRequestResponse({
     description: 'Bad Request, ArtistId is invalid',
   })
-  removeArtist(@Param('id') id: string) {
-    return this.favoritesService.remove(id, 'artists');
+  removeArtist(@Param('id', ParseUUIDPipe) id: string) {
+    return this.favoritesService.removeArtist(id);
   }
 
   @Delete('album/:id')
@@ -120,7 +120,7 @@ export class FavoritesController {
   @ApiBadRequestResponse({
     description: 'Bad Request, AlbumId is invalid',
   })
-  removeAlbum(@Param('id') id: string) {
-    return this.favoritesService.remove(id, 'albums');
+  removeAlbum(@Param('id', ParseUUIDPipe) id: string) {
+    return this.favoritesService.removeAlbum(id);
   }
 }
