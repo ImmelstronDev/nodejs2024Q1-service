@@ -19,6 +19,15 @@ export class FavoritesService {
       },
     });
 
+    if (favs.length === 0)
+      return await this.databaseService.favorites.create({
+        select: {
+          albums: true,
+          tracks: true,
+          artists: true,
+        },
+      });
+
     const favorites = favs[0];
     return {
       tracks: favorites.tracks.map((trackInfo) => trackInfo.track),

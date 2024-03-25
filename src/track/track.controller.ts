@@ -94,6 +94,7 @@ export class TrackController {
   @ApiNoContentResponse({
     description: 'deleted was success',
   })
+  @ApiNotFoundResponse({ description: 'Track was not found' })
   @ApiBadRequestResponse({ description: 'Bad request, invalid id' })
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseUUIDPipe) id: string) {

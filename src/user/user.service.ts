@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,18 +42,29 @@ export class UserService {
     const user = await this.databaseService.user.findUnique({
       where: { id: id },
     });
-    if (user.password !== oldPassword) {
+    if (!user) throw new NotFoundException(`User was not found`);
+    if (user.password === oldPassword) {
       await this.databaseService.user.update({
         where: { id: id },
         data: { password: newPassword, version: { increment: 1 } },
       });
+      return await this.databaseService.user.findUnique({
+        where: { id: id },
+        select: {
+          id: true,
+          createdAt: true,
+          login: true,
+          updateAt: true,
+          version: true,
+        },
+      });
     }
-    return await this.databaseService.user.findUnique({ where: { id: id } });
+    throw new ForbiddenException(`User oldPassword is wrong`);
   }
 
   async removeUser(id: string) {
     try {
-      return this.databaseService.user.delete({ where: { id: id } });
+      return await this.databaseService.user.delete({ where: { id: id } });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

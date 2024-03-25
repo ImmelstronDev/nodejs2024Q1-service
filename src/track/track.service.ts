@@ -37,7 +37,7 @@ export class TrackService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025'
       ) {
-        throw new NotFoundException(`User was not found`);
+        throw new NotFoundException(`Track was not found`);
       } else {
         throw error;
       }
@@ -46,13 +46,13 @@ export class TrackService {
 
   async removeTrack(id: string) {
     try {
-      return this.databaseService.track.delete({ where: { id: id } });
+      return await this.databaseService.track.delete({ where: { id: id } });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2025'
       ) {
-        throw new NotFoundException(`User was not found`);
+        throw new NotFoundException(`Track was not found`);
       } else {
         throw error;
       }

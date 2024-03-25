@@ -11,7 +11,7 @@ ARG NODE_VERSION=20.11.0
 FROM node:${NODE_VERSION}-alpine
 
 # Use production node environment by default.
-ENV NODE_ENV production
+# ENV NODE_ENV production
 
 
 WORKDIR /usr/app
@@ -21,10 +21,10 @@ COPY package*.json .
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
 # Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
 # into this layer.
-RUN npm ci
+RUN npm i
 
 # Run the application as a non-root user.
-USER node
+# USER node
 
 # Copy the rest of the source files into the image.
 COPY . .
@@ -35,4 +35,4 @@ EXPOSE 4000
 ENTRYPOINT [ "./entrypoint.sh" ]
 
 # Run the application.
-CMD ["npm", "run"  "start:dev"]
+CMD ["npm", "run" , "start"]

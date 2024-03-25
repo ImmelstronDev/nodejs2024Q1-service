@@ -46,7 +46,7 @@ export class ArtistService {
 
   async removeArtist(id: string) {
     try {
-      return this.databaseService.artist.delete({ where: { id: id } });
+      return await this.databaseService.artist.delete({ where: { id: id } });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

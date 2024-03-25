@@ -46,7 +46,7 @@ export class AlbumService {
 
   async removeAlbum(id: string) {
     try {
-      return this.databaseService.album.delete({ where: { id: id } });
+      return await this.databaseService.album.delete({ where: { id: id } });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

@@ -38,8 +38,8 @@ export class UserController {
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   async create(@Body() createUserDto: CreateUserDto) {
-    const user = this.userService.createUser(createUserDto);
-    // return new User(user);
+    const user = await this.userService.createUser(createUserDto);
+    return new User(user);
   }
 
   @Header('content-type', 'application/json')
@@ -49,7 +49,7 @@ export class UserController {
     description: 'success',
   })
   async findAll() {
-    return this.userService.findAllUsers();
+    return await this.userService.findAllUsers();
   }
 
   @Header('content-type', 'application/json')
@@ -64,7 +64,7 @@ export class UserController {
     description: 'user is not found',
   })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.findOneUser(id);
+    return await this.userService.findOneUser(id);
   }
 
   @Header('content-type', 'application/json')
